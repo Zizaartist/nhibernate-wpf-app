@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32106.194
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "happy-water-carrier-test", "happy-water-carrier-test\happy-water-carrier-test.csproj", "{ED8AAD39-6156-4EF5-9780-CB68244EE88E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ED8AAD39-6156-4EF5-9780-CB68244EE88E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED8AAD39-6156-4EF5-9780-CB68244EE88E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED8AAD39-6156-4EF5-9780-CB68244EE88E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED8AAD39-6156-4EF5-9780-CB68244EE88E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C58F105D-4F79-4B11-912D-ABB416F82E90}
+	EndGlobalSection
+EndGlobal
