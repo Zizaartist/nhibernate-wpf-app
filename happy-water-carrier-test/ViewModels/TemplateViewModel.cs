@@ -6,8 +6,15 @@ namespace happy_water_carrier_test.ViewModels
 {
     public abstract class TemplateViewModel : ObservableObject
     {
-        protected abstract void OnBusyChanged(bool value);
+        ~TemplateViewModel() 
+        {
+            foreach (var deleg in OnBusyChanged.GetInvocationList())
+                OnBusyChanged -= (deleg as EventHandler<bool>);
+        }
+
         protected abstract void OnCurrentListSelectionChanged(ListElementModel newSelection);
+
+        protected event EventHandler<bool> OnBusyChanged;
 
         private ListElementModel currentListSelection;
         public ListElementModel CurrentListSelection
@@ -32,7 +39,7 @@ namespace happy_water_carrier_test.ViewModels
                 isBusy = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(IsNotBusy));
-                OnBusyChanged(value);
+                OnBusyChanged?.Invoke(null, value);
             }
         }
 

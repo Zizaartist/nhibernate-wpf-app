@@ -1,4 +1,6 @@
-﻿using System;
+﻿using happy_water_carrier_test.Models.LocalModels;
+using happy_water_carrier_test.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,9 +22,33 @@ namespace happy_water_carrier_test.Views
     /// </summary>
     public partial class OrderPage : Page
     {
-        public OrderPage()
+        public OrderPage(OrderViewModel orderViewModel)
         {
             InitializeComponent();
+            DataContext = orderViewModel;
+            orderViewModel.Refresh.Execute(null);
+        }
+
+        private void backButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (NavigationService.CanGoBack)
+                NavigationService.GoBack();
+        }
+
+        private int? lastSelectedTagId;
+
+        private void ExcludedTagsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selectedItemObj = (e.AddedItems as IEnumerable<object> ?? Enumerable.Empty<object>()).FirstOrDefault();
+            if (selectedItemObj != null)
+            {
+                var selectedItem = selectedItemObj as ListElementModel;
+                if (lastSelectedTagId != selectedItem.Id)
+                    TagNameField.Text = selectedItem.Value;
+                lastSelectedTagId = selectedItem.Id;
+            }
+            else
+                lastSelectedTagId = null;
         }
     }
 }

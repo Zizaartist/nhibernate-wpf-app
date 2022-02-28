@@ -3,10 +3,14 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:helpers="clr-namespace:happy_water_carrier_test.Helpers"
       mc:Ignorable="d" 
       d:DesignHeight="600" d:DesignWidth="800"
       Title="OrderPage">
-
+    <Page.Resources>
+        <helpers:MultibindingConverter x:Key="MultiBindConverter"/>
+    </Page.Resources>
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
@@ -20,26 +24,40 @@
                 <RowDefinition Height="50"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <Button Content="Назад" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" Height="25" Width="100"/>
-            <ListView Grid.Row="1">
+            <Button x:Name="backButton"
+                    Content="Назад" 
+                    HorizontalAlignment="Left"
+                    Margin="10,0,0,0" 
+                    VerticalAlignment="Center" 
+                    Click="backButton_Click"
+                    Height="25" 
+                    Width="100"/>
+            <ListView Grid.Row="1" 
+                      ItemsSource="{Binding Orders}"
+                      SelectedItem="{Binding CurrentListSelection, Mode=TwoWay}">
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn/>
+                        <GridViewColumn Header="ID"
+                                        Width="50"
+                                        DisplayMemberBinding="{Binding Id}"/>
+                        <GridViewColumn Header="Имя продукта"
+                                        Width="200"
+                                        DisplayMemberBinding="{Binding Value}"/>
                     </GridView>
                 </ListView.View>
             </ListView>
-            <Button Content="Обновить" HorizontalAlignment="Right" Margin="0,0,10,0" VerticalAlignment="Center" Width="100" Height="25"/>
+            <Button Content="Обновить" 
+                    Command="{Binding Refresh}"
+                    HorizontalAlignment="Right" 
+                    Margin="0,0,10,0" VerticalAlignment="Center" Width="100" Height="25"/>
         </Grid>
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="38*"/>
-                <RowDefinition Height="38*"/>
-                <RowDefinition Height="38*"/>
-                <RowDefinition Height="38*"/>
-                <RowDefinition Height="200"/>
-                <RowDefinition Height="38*"/>
-                <RowDefinition Height="38*"/>
-                <RowDefinition Height="75*"/>
+                <RowDefinition Height="120*"/>
+                <RowDefinition Height="120*"/>
+                <RowDefinition Height="120*"/>
+                <RowDefinition Height="360*"/>
+                <RowDefinition Height="240*"/>
             </Grid.RowDefinitions>
             <Label Content="ID" 
                    HorizontalAlignment="Stretch" 
@@ -47,83 +65,136 @@
                    HorizontalContentAlignment="Center" 
                    VerticalContentAlignment="Center"/>
             <TextBox HorizontalAlignment="Stretch" 
-                     Text="ID" 
+                     Text="{Binding CurrentOrder.Id}"
                      TextWrapping="Wrap" 
                      VerticalAlignment="Bottom" 
-                     Margin="10,0,10,0"/>
-            <Label Content="Имя" 
+                     Margin="10,0,10,0"
+                     IsReadOnly="True"/>
+            <Label Content="Имя товара" 
                    HorizontalAlignment="Stretch" 
                    VerticalAlignment="Top"
                    Grid.Row="1" Margin="10,0,10,0" 
                    HorizontalContentAlignment="Center" 
                    VerticalContentAlignment="Center"/>
             <TextBox HorizontalAlignment="Stretch" 
-                     Text="Имя" 
+                     Text="{Binding CurrentOrder.ProductName, Mode=TwoWay}" 
+                     IsEnabled="{Binding IsNotBusy}"
                      TextWrapping="Wrap" 
                      VerticalAlignment="Bottom"
                      Grid.Row="1" Margin="10,0,10,0"/>
-            <Label Content="Фамилия" 
+            <Label Content="Сотрудник" 
                    HorizontalAlignment="Stretch" 
                    VerticalAlignment="Top"
                    Grid.Row="2" Margin="10,0,10,0" 
                    HorizontalContentAlignment="Center" 
                    VerticalContentAlignment="Center"/>
-            <TextBox HorizontalAlignment="Stretch" 
-                     Text="Фамилия" 
-                     TextWrapping="Wrap" 
-                     VerticalAlignment="Bottom"
-                     Grid.Row="2" Margin="10,0,10,0"/>
-            <Label Content="Отчество" 
+            <ComboBox HorizontalAlignment="Stretch" 
+                      VerticalAlignment="Bottom" 
+                      Grid.Row="2"
+                      DisplayMemberPath="Value"
+                      ItemsSource="{Binding Employees}"
+                      SelectedItem="{Binding CurrentOrder.Employee, Mode=TwoWay}"
+                      IsEnabled="{Binding IsNotBusy}"
+                      Margin="10,0,10,0" />
+            <Label Content="Теги" 
                    HorizontalAlignment="Stretch" 
                    VerticalAlignment="Top"
                    Grid.Row="3" Margin="10,0,10,0" 
                    HorizontalContentAlignment="Center" 
                    VerticalContentAlignment="Center"/>
-            <TextBox HorizontalAlignment="Stretch" 
-                     Text="Отчество" 
+            <ListBox Grid.Row="3" 
+                     x:Name="ExcludedTagsList"
+                     HorizontalAlignment="Left" 
+                     SelectionMode="Extended"
+                     ItemsSource="{Binding ExcludedTags}"
+                     DisplayMemberPath="Value"
+                     SelectionChanged="ExcludedTagsList_SelectionChanged"
+                     Width="100" 
+                     Margin="10,10,0,50"/>
+            <ListBox Grid.Row="3" 
+                     x:Name="IncludedTagsList"
+                     HorizontalAlignment="Right"
+                     SelectionMode="Extended"
+                     ItemsSource="{Binding CurrentOrder.IncludedTags}"
+                     DisplayMemberPath="Value"
+                     Width="100" 
+                     Margin="0,10,10,50"/>
+            <Button Content="&gt;&gt;&gt;" 
+                    HorizontalAlignment="Center" 
+                    Margin="0,30,0,0" 
+                    Grid.Row="3" 
+                    Command="{Binding IncludeTags}"
+                    CommandParameter="{Binding ElementName=ExcludedTagsList, Path=SelectedItems}"
+                    VerticalAlignment="Top"/>
+            <Button Content="&lt;&lt;&lt;"
+                    HorizontalAlignment="Center"
+                    Margin="0,60,0,0" 
+                    Grid.Row="3" 
+                    Command="{Binding ExcludeTags}"
+                    CommandParameter="{Binding ElementName=IncludedTagsList, Path=SelectedItems}"
+                    VerticalAlignment="Top"/>
+            <Button Content="Добавить" 
+                    HorizontalAlignment="Left" 
+                    Margin="133,0,0,10"
+                    Grid.Row="3" 
+                    Command="{Binding AddTag}"
+                    CommandParameter="{Binding ElementName=TagNameField, Path=Text}"
+                    VerticalAlignment="Bottom"/>
+            <Button Content="Изменить" 
+                    HorizontalAlignment="Left" 
+                    Margin="195,0,0,10" 
+                    Grid.Row="3" 
+                    Command="{Binding UpdateTag}"
+                    VerticalAlignment="Bottom">
+                <Button.CommandParameter>
+                    <MultiBinding Converter="{StaticResource MultiBindConverter}">
+                        <Binding ElementName="ExcludedTagsList" Path="SelectedItem"/>
+                        <Binding ElementName="TagNameField" Path="Text"/>
+                    </MultiBinding>
+                </Button.CommandParameter>
+            </Button>
+            <Button Content="Удалить" 
+                    HorizontalAlignment="Left"
+                    Margin="258,0,0,10" 
+                    Grid.Row="3" 
+                    Command="{Binding RemoveTag}"
+                    CommandParameter="{Binding ElementName=ExcludedTagsList, Path=SelectedItem}"
+                    VerticalAlignment="Bottom"/>
+            <TextBox HorizontalAlignment="Left" 
+                     x:Name="TagNameField"
+                     Margin="10,0,0,10" 
+                     Grid.Row="3" 
+                     Text="" 
                      TextWrapping="Wrap" 
-                     VerticalAlignment="Bottom"
-                     Grid.Row="3" Margin="10,0,10,0"/>
-            <Label HorizontalAlignment="Stretch" 
-                   VerticalAlignment="Top"
-                   Grid.Row="4" 
-                   Margin="10,0,10,0" 
-                   HorizontalContentAlignment="Center" 
-                   VerticalContentAlignment="Center">
-            </Label>
-            <Calendar HorizontalAlignment="Stretch" 
-                      Margin="0,0,0,0" 
-                      Grid.Row="4" 
-                      VerticalAlignment="Bottom"/>
-            <Label Content="Пол" 
-                   HorizontalAlignment="Stretch" 
-                   VerticalAlignment="Top"
-                   Grid.Row="5" Margin="10,0,10,0" 
-                   HorizontalContentAlignment="Center" 
-                   VerticalContentAlignment="Center"/>
-            <ComboBox HorizontalAlignment="Stretch" 
-                   VerticalAlignment="Bottom" 
-                   Grid.Row="5"
-                   Margin="10,0,10,0" />
-            <Label Content="Подразделение" 
-                   HorizontalAlignment="Stretch" 
-                   VerticalAlignment="Top"
-                   Grid.Row="6" Margin="10,0,10,0" 
-                   HorizontalContentAlignment="Center" 
-                   VerticalContentAlignment="Center"/>
-            <ComboBox HorizontalAlignment="Stretch" 
-                   VerticalAlignment="Bottom" 
-                   Grid.Row="6"
-                   Margin="10,0,10,0" />
-            <Grid Grid.Row="7">
+                     VerticalAlignment="Bottom" 
+                     Width="120"/>
+            <Grid Grid.Row="4">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
+                    <ColumnDefinition Width="6*"/>
+                    <ColumnDefinition Width="13*"/>
+                    <ColumnDefinition Width="19*"/>
+                    <ColumnDefinition Width="19*"/>
                 </Grid.ColumnDefinitions>
-                <Button Content="Добавить" HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="25"/>
-                <Button Content="Сохранить" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="1" Width="100" Height="25"/>
-                <Button Content="Удалить" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="2" Width="100" Height="25"/>
+                <Button Content="Добавить" 
+                        HorizontalAlignment="Left" 
+                        VerticalAlignment="Center" 
+                        Command="{Binding Add}"
+                        Width="100" 
+                        Height="25" Grid.ColumnSpan="2" Margin="17,0,0,0"/>
+                <Button Content="Сохранить" 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Center" 
+                        Grid.Column="2" 
+                        Command="{Binding Update}"
+                        Width="100" 
+                        Height="25"/>
+                <Button Content="Удалить" 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Center" 
+                        Grid.Column="3" 
+                        Command="{Binding Remove}"
+                        Width="100" 
+                        Height="25"/>
             </Grid>
         </Grid>
     </Grid>

@@ -49,6 +49,7 @@ namespace happy_water_carrier_test
 
             builder.RegisterType<EmployeeDataAccess>().As<IEmployeeDataAccess>();
             builder.RegisterType<SubdivisionDataAccess>().As<ISubdivisionDataAccess>();
+            builder.RegisterType<OrderDataAccess>().As<IOrderDataAccess>();
         }
 
         private void ConfigureServices(IServiceCollection services)

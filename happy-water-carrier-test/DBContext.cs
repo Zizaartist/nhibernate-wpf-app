@@ -20,9 +20,9 @@ namespace happy_water_carrier_test
 
         public virtual DbSet<Employee> Employees { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
-        public virtual DbSet<OrderTag> OrderTags { get; set; }
         public virtual DbSet<Subdivision> Subdivisions { get; set; }
         public virtual DbSet<Tag> Tags { get; set; }
+        public virtual DbSet<OrderTag> OrderTags { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -94,29 +94,32 @@ namespace happy_water_carrier_test
                     .HasForeignKey(d => d.EmployeeId)
                     .OnDelete(DeleteBehavior.SetNull)
                     .HasConstraintName("order_employee_fk");
+
+                entity.HasMany(d => d.Tags)
+                    .WithMany(p => p.Orders)
+                    .UsingEntity<OrderTag>(
+                        e => e.HasOne(x => x.Tag)
+                            .WithMany(x => x.OrderTags)
+                            .HasForeignKey(x => x.TagId)
+                            .HasConstraintName("order_tag_tag_id_fk"),
+                        e => e.HasOne(x => x.Order)
+                            .WithMany(x => x.OrderTags)
+                            .HasForeignKey(x => x.OrderId)
+                            .HasConstraintName("order_tag_order_id_fk"),
+                        e => 
+                        {
+                            e.HasKey(x => new { x.TagId, x.OrderId })
+                                .HasName("order_tag_pk");
+                            e.ToTable("order_tag");
+                        }
+                    );
             });
 
-            modelBuilder.Entity<OrderTag>(entity =>
+            modelBuilder.Entity<OrderTag>(entity=> 
             {
-                entity.HasKey(e => new { e.OrderId, e.TagId })
-                    .HasName("order_tag_pk")
-                    .IsClustered(false);
-
-                entity.ToTable("order_tag");
-
                 entity.Property(e => e.OrderId).HasColumnName("order_id");
 
                 entity.Property(e => e.TagId).HasColumnName("tag_id");
-
-                entity.HasOne(d => d.Order)
-                    .WithMany(p => p.OrderTags)
-                    .HasForeignKey(d => d.OrderId)
-                    .HasConstraintName("order_tag_order_id_fk");
-
-                entity.HasOne(d => d.Tag)
-                    .WithMany(p => p.OrderTags)
-                    .HasForeignKey(d => d.TagId)
-                    .HasConstraintName("order_tag_tag_id_fk");
             });
 
             modelBuilder.Entity<Subdivision>(entity =>

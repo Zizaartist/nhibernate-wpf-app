@@ -48,6 +48,12 @@ namespace happy_water_carrier_test.ViewModels
             Add = new RelayCommand(() => BusyAction(AddAction), CanExecuteCommands);
             Update = new RelayCommand(() => BusyAction(UpdateAction), CanExecuteCommands);
             Remove = new RelayCommand(() => BusyAction(RemoveAction), CanExecuteCommands);
+
+            OnBusyChanged += (_, _) => Refresh.NotifyCanExecuteChanged();
+            OnBusyChanged += (_, _) => Get.NotifyCanExecuteChanged();
+            OnBusyChanged += (_, _) => Add.NotifyCanExecuteChanged();
+            OnBusyChanged += (_, _) => Update.NotifyCanExecuteChanged();
+            OnBusyChanged += (_, _) => Remove.NotifyCanExecuteChanged();
         }
 
         protected override void OnCurrentListSelectionChanged(ListElementModel newSelection)
@@ -61,15 +67,6 @@ namespace happy_water_carrier_test.ViewModels
             {
                 CurrentEmployee = null;
             }
-        }
-
-        protected override void OnBusyChanged(bool value)
-        {
-            Refresh?.NotifyCanExecuteChanged();
-            Get?.NotifyCanExecuteChanged();
-            Add?.NotifyCanExecuteChanged();
-            Update?.NotifyCanExecuteChanged();
-            Remove?.NotifyCanExecuteChanged();
         }
 
         private void RefreshEmployeesAction()
